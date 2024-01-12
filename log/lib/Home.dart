@@ -1,26 +1,92 @@
-// ignore_for_file: use_key_in_widget_constructors, prefer_const_constructors, prefer_const_literals_to_create_immutables, sized_box_for_whitespace, use_build_context_synchronously
+// ignore_for_file: use_key_in_widget_constructors, prefer_const_constructors, prefer_const_literals_to_create_immutables, sized_box_for_whitespace, use_build_context_synchronously, prefer_const_constructors_in_immutables, library_private_types_in_public_api, avoid_print, deprecated_member_use
 // home.dart
 
+import 'dart:convert';
 import 'dart:io';
-
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:log/DriverMap.dart';
 import 'package:log/shift.dart';
 import 'package:log/Excep.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
 import 'package:log/main.dart';
+import 'package:path_provider/path_provider.dart';
+
 
 class Home extends StatefulWidget {
+  final String? jwtToken;
+
+  Home(this.jwtToken);
+  Home.withoutToken() : jwtToken = null;
+
   @override
   _HomeState createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
   File? _image;
+  late Map<String, dynamic> decodedToken;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Decode the JWT token only if it is provided
+    if (widget.jwtToken != null) {
+      decodedToken = _decodeToken(widget.jwtToken!);
+      // Fetch and display profile image
+      _fetchAndDisplayProfileImage(decodedToken['id']);
+    }
+  }
+
+  Map<String, dynamic> _decodeToken(String token) {
+    final parts = token.split('.');
+    if (parts.length != 3) {
+      throw Exception('Invalid token');
+    }
+
+    final payload = parts[1];
+    final String decoded =
+        utf8.decode(base64Url.decode(base64Url.normalize(payload)));
+
+    return json.decode(decoded);
+  }
+
+  Future<void> _fetchAndDisplayProfileImage(int userId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('https://671b-185-88-83-143.ngrok-free.app/api/drivers/8'),
+      );
+      final Map<String, dynamic> responseData = json.decode(response.body);
+
+      print('Response Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
+      if (response.statusCode == 200) {
+        String imageBase64 = responseData['image'];
+        Uint8List imageBytes = base64.decode(imageBase64);
+        // Display the image
+        final tempDir = await getTemporaryDirectory();
+        final tempFile = File('${tempDir.path}/profile_image.png');
+        await tempFile.writeAsBytes(imageBytes);
+        setState(() {
+          _image = File.fromRawPath(imageBytes);
+        });
+      } else {
+        // Handle the case when the request is not successful
+        print('Failed to fetch profile image: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error fetching profile image: $error');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    String name = decodedToken['sub']?.toString() ?? 'Default Name';
+    int id = decodedToken['id']?.toInt() ?? 0;
+
     return Scaffold(
       backgroundColor: Colors.lightBlue,
       appBar: AppBar(
@@ -94,12 +160,12 @@ class _HomeState extends State<Home> {
                       ),
                       SizedBox(height: 8),
                       Text(
-                        'ID: 12345',
+                        'ID: $id',
                         style: TextStyle(color: Colors.white),
                       ),
                       SizedBox(height: 4),
                       Text(
-                        'Name: John Doe',
+                        'Name: $name',
                         style: TextStyle(color: Colors.white),
                       ),
                     ],

@@ -1,5 +1,5 @@
 // ignore_for_file: use_key_in_widget_constructors, prefer_const_constructors, prefer_const_literals_to_create_immutables
-// home.dart
+// shift.dart
 
 import 'package:flutter/material.dart';
 import 'package:log/DriverMap.dart';
@@ -41,15 +41,31 @@ class Shift extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         _buildShiftButton(
-          onTap: () =>
-              _showConfirmationDialog(context, "Start a shift", DriverMap()),
+          onTap: () => _showConfirmationDialog(
+            context,
+            "Start a shift",
+            () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => DriverMap()),
+              );
+            },
+          ),
           imageAsset: 'assets/start.png',
           label: 'Start Shift',
         ),
         SizedBox(width: 30),
         _buildShiftButton(
-          onTap: () =>
-              _showConfirmationDialog(context, "End your shift", Home()),
+          onTap: () => _showConfirmationDialog(
+            context,
+            "End your shift",
+            () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Home.withoutToken()),
+              );
+            },
+          ),
           imageAsset: 'assets/end.png',
           label: 'End Shift',
         ),
@@ -80,28 +96,30 @@ class Shift extends StatelessWidget {
     );
   }
 
-  Future<void> _showConfirmationDialog(
-      BuildContext context, String message, Widget destination) async {
-    return showDialog(
+  void _showConfirmationDialog(
+    BuildContext context,
+    String message,
+    VoidCallback onConfirmation,
+  ) {
+    showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Are you sure you want to $message?"),
+          title: Text("Confirmation"),
+          content: Text(message),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => destination),
-                );
+                Navigator.pop(context);
+                onConfirmation();
               },
-              child: Text("Confirm"),
+              child: Text("Yes"),
             ),
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text("Cancel"),
+              child: Text("No"),
             ),
           ],
         );
@@ -139,7 +157,7 @@ class Shift extends StatelessWidget {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => Home()),
+              MaterialPageRoute(builder: (context) => Home.withoutToken()),
             );
           },
           child: Text('Back Home'),
