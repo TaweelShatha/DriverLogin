@@ -1,0 +1,15 @@
+flutter_native_splash: 
+ #for background color in normal mode
+ color: '#ffffff'
+ #for background image. It must be a .png file
+ image: icons/logo.png 
+ #for showing the splash in the particular platform. By default it  is false
+ android: true 
+ ios: true
+ web: false
+ #for adjusting image (fill acc to screen resoultion)for android and    for ios
+ android_gravity: fill 
+ ios_content_mode: scaleAspectFill
+
+ # To hide the notification bar, use the fullscreen parameter.
+ fullscreen: true

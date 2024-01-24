@@ -1,4 +1,4 @@
-// ignore_for_file: use_key_in_widget_constructors, prefer_const_constructors, prefer_const_literals_to_create_immutables, sized_box_for_whitespace, use_build_context_synchronously, prefer_const_constructors_in_immutables, library_private_types_in_public_api, avoid_print, deprecated_member_use
+// ignore_for_file: use_key_in_widget_constructors, prefer_const_constructors, prefer_const_literals_to_create_immutables, sized_box_for_whitespace, use_build_context_synchronously, prefer_const_constructors_in_immutables, library_private_types_in_public_api, avoid_print, deprecated_member_use, avoid_init_to_null
 // home.dart
 
 import 'dart:convert';
@@ -27,17 +27,15 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   File? _image;
-  late Map<String, dynamic> decodedToken;
+  late Map<String, dynamic>? decodedToken = null;
 
   @override
   void initState() {
     super.initState();
 
-    // Decode the JWT token only if it is provided
     if (widget.jwtToken != null) {
       decodedToken = _decodeToken(widget.jwtToken!);
-      // Fetch and display profile image
-      _fetchAndDisplayProfileImage(decodedToken['id']);
+      _fetchAndDisplayProfileImage(decodedToken?['id']);
     }
   }
 
@@ -84,8 +82,8 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    String name = decodedToken['sub']?.toString() ?? 'Default Name';
-    int id = decodedToken['id']?.toInt() ?? 0;
+    String name = decodedToken?['sub']?.toString() ?? 'Default Name';
+    int id = decodedToken?['id']?.toInt() ?? 0;
 
     return Scaffold(
       backgroundColor: Colors.lightBlue,
